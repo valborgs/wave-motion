@@ -19,7 +19,7 @@ class HandRepositoryImpl(
     private val mediaPipeDataSource: MediaPipeDataSource
 ) : HandRepository {
 
-    override fun getHandTrackingStream(): Flow<HandLandmark> {
+    override fun getHandTrackingStream(): Flow<List<HandLandmark>> {
         // MediaPipe 소스로부터 실시간 좌표 스트림을 가져옵니다.
         return mediaPipeDataSource.getHandLandmarks()
     }

@@ -42,7 +42,7 @@ fun TrackingScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
     
-    val handLandmark by viewModel.handLandmark.collectAsStateWithLifecycle()
+    val handLandmarks by viewModel.handLandmarks.collectAsStateWithLifecycle()
     val imageSize by viewModel.imageSize.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit){
@@ -100,19 +100,19 @@ fun TrackingScreen(
         )
 
         Canvas(modifier = Modifier.fillMaxSize()) {
-            handLandmark?.let { landmark ->
+            val imageW = imageSize.first.toFloat()
+            val imageH = imageSize.second.toFloat()
+
+            // PreviewView의 FIT_CENTER 스케일링 및 오프셋 계산 (minOf 사용)
+            val scale = minOf(size.width / imageW, size.height / imageH)
+            val scaledW = imageW * scale
+            val scaledH = imageH * scale
+            val startX = (size.width - scaledW) / 2f
+            val startY = (size.height - scaledH) / 2f
+
+            handLandmarks.forEach { landmark ->
                 val points = landmark.points
                 if (points.size >= 21) {
-                    val imageW = imageSize.first.toFloat()
-                    val imageH = imageSize.second.toFloat()
-                    
-                    // PreviewView의 FIT_CENTER 스케일링 및 오프셋 계산 (minOf 사용)
-                    val scale = minOf(size.width / imageW, size.height / imageH)
-                    val scaledW = imageW * scale
-                    val scaledH = imageH * scale
-                    val startX = (size.width - scaledW) / 2f
-                    val startY = (size.height - scaledH) / 2f
-
                     // 전면 카메라인 경우 좌우 반전 필요: scaledW 안에서 반전 후 오프셋 더하기
                     val offsets = points.map { 
                         val px = startX + (1f - it.x) * scaledW

@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.Flow
 import org.comon.wavemotion.domain.entity.HandLandmark
 
 interface MediaPipeDataSource {
-    fun getHandLandmarks(): Flow<HandLandmark>
+    fun getHandLandmarks(): Flow<List<HandLandmark>>
     fun processImage(bitmap: Bitmap, rotationDegrees: Int)
 }

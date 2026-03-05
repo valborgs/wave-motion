@@ -10,7 +10,7 @@ interface HandRepository {
     /**
      * 실시간으로 추출되는 손 관절 데이터 스트림을 반환합니다.
      */
-    fun getHandTrackingStream(): Flow<HandLandmark>
+    fun getHandTrackingStream(): Flow<List<HandLandmark>>
 
     /**
      * 추출된 데이터를 외부(VSeeFace)로 전송합니다.

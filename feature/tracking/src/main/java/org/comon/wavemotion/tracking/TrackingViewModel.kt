@@ -15,16 +15,16 @@ class TrackingViewModel(
     private val processImageUseCase: ProcessImageUseCase,
 ): ViewModel() {
 
-    private val _handLandmark = MutableStateFlow<HandLandmark?>(null)
-    val handLandmark: StateFlow<HandLandmark?> = _handLandmark.asStateFlow()
+    private val _handLandmarks = MutableStateFlow<List<HandLandmark>>(emptyList())
+    val handLandmarks: StateFlow<List<HandLandmark>> = _handLandmarks.asStateFlow()
 
     private val _imageSize = MutableStateFlow(Pair(1, 1))
     val imageSize: StateFlow<Pair<Int, Int>> = _imageSize.asStateFlow()
 
     fun startTracking() {
         viewModelScope.launch {
-            streamHandTrackingUseCase().collect { landmark ->
-                _handLandmark.value = landmark
+            streamHandTrackingUseCase().collect { landmarks ->
+                _handLandmarks.value = landmarks
             }
         }
     }

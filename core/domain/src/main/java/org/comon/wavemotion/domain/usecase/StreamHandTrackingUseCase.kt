@@ -14,15 +14,17 @@ class StreamHandTrackingUseCase(
 ) {
     /**
      * 트래킹 스트림을 시작합니다.
-     * 반환되는 Flow를 collect하면 실시간 좌표 데이터를 얻을 수 있으며,
-     * 각 데이터가 발생할 때마다 자동으로 VMC 전송 로직이 실행됩니다.
+     * 반환되는 Flow를 collect하면 실시간 양손의 좌표 데이터를 얻을 수 있으며,
+     * 각 손의 데이터가 발생할 때마다 자동으로 VMC 전송 로직이 실행됩니다.
      *
-     * @return 손 관절 데이터 스트림 (HandLandmark Flow)
+     * @return 양손 관절 데이터 리스트 스트림 (List<HandLandmark> Flow)
      */
-    operator fun invoke(): Flow<HandLandmark> = handRepository
+    operator fun invoke(): Flow<List<HandLandmark>> = handRepository
         .getHandTrackingStream()
-        .onEach { landmark ->
-            // 데이터가 들어올 때마다 VMC 서버(VSeeFace)로 좌표를 전송합니다.
-            handRepository.sendToVmc(landmark)
+        .onEach { landmarks ->
+            // 각 손의 데이터를 순회하며 VMC 서버(VSeeFace)로 좌표를 전송합니다.
+            landmarks.forEach { landmark ->
+                handRepository.sendToVmc(landmark)
+            }
         }
 }

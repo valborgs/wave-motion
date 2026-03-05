@@ -25,7 +25,7 @@ class MediaPipeDataSourceImpl(
 ) : MediaPipeDataSource {
 
     // 실시간 스트림 데이터를 담을 Flow (최신 데이터 1개만 유지)
-    private val _handLandmarks = MutableSharedFlow<HandLandmark>(
+    private val _handLandmarks = MutableSharedFlow<List<HandLandmark>>(
         replay = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
@@ -46,6 +46,7 @@ class MediaPipeDataSourceImpl(
 
         val options = HandLandmarker.HandLandmarkerOptions.builder()
             .setBaseOptions(baseOptions)
+            .setNumHands(2) // 양손 추적 활성화
             .setMinHandDetectionConfidence(0.5f) // 검출 임계값
             .setMinHandPresenceConfidence(0.5f)
             .setMinTrackingConfidence(0.5f)
@@ -74,30 +75,36 @@ class MediaPipeDataSourceImpl(
     private fun processResult(result: HandLandmarkerResult) {
         if (result.landmarks().isEmpty()) return
 
-        // 첫 번째로 감지된 손의 데이터를 가져옵니다.
-        val landmarks = result.landmarks()[0]
-        val handedness = result.handedness()[0][0] // 오른손/왼손 정보
+        val landmarksList = mutableListOf<HandLandmark>()
 
-        // 1. NormalizedLandmark -> HandPoint 변환
-        val points = landmarks.map { landmark ->
-            HandPoint(
-                x = landmark.x(),
-                y = landmark.y(),
-                z = landmark.z()
+        for (i in result.landmarks().indices) {
+            val landmarks = result.landmarks()[i]
+            val handedness = result.handedness()[i][0] // 오른손/왼손 정보
+
+            // 1. NormalizedLandmark -> HandPoint 변환
+            val points = landmarks.map { landmark ->
+                HandPoint(
+                    x = landmark.x(),
+                    y = landmark.y(),
+                    z = landmark.z()
+                )
+            }
+
+            // 2. HandLandmark 엔티티 생성
+            val handLandmark = HandLandmark(
+                points = points,
+                // MediaPipe의 전면 카메라 분류 특성상 좌우가 반전되어 인식될 수 있으나 기본값 사용
+                isRightHand = handedness.categoryName() == "Right",
+                timestamp = System.currentTimeMillis()
             )
+            landmarksList.add(handLandmark)
         }
 
-        // 2. HandLandmark 엔티티 생성 및 Flow 방출
-        val handLandmark = HandLandmark(
-            points = points,
-            isRightHand = handedness.categoryName() == "Right",
-            timestamp = System.currentTimeMillis()
-        )
-
-        _handLandmarks.tryEmit(handLandmark)
+        // 전체 손 리스트 Flow 방출
+        _handLandmarks.tryEmit(landmarksList)
     }
 
-    override fun getHandLandmarks(): Flow<HandLandmark> = _handLandmarks.asSharedFlow()
+    override fun getHandLandmarks(): Flow<List<HandLandmark>> = _handLandmarks.asSharedFlow()
 
     fun close() {
         handLandmarker?.close()
