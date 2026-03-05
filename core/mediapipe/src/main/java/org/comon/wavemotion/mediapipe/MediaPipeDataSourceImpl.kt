@@ -73,7 +73,10 @@ class MediaPipeDataSourceImpl(
      * MediaPipe의 결과 데이터를 도메인 모델인 HandLandmark로 변환합니다.
      */
     private fun processResult(result: HandLandmarkerResult) {
-        if (result.landmarks().isEmpty()) return
+        if (result.landmarks().isEmpty()) {
+            _handLandmarks.tryEmit(emptyList())
+            return
+        }
 
         val landmarksList = mutableListOf<HandLandmark>()
 

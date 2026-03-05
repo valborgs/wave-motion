@@ -5,6 +5,22 @@
 ---
 
 ## 2026-03-05
+**제목:** 손 추적 중단 시 스켈레톤 UI 즉시 숨김 처리
+
+**요구사항:**
+- 카메라 화면에서 손이 프레임 밖으로 나가거나 추적이 끊기면, 마지막으로 그려진 스켈레톤 UI가 화면에 잔류하는 문제 해결.
+
+**원인 분석:**
+- `MediaPipeDataSourceImpl`의 `processResult()` 함수는 MediaPipe 결과의 `landmarks()`가 비어있으면 곧바로 `return`하고 있었음.
+- `MutableSharedFlow`의 `replay = 1` 설정으로 인해 마지막으로 emit된 손 데이터가 구독자에게 계속 전달되어, `TrackingScreen`의 `Canvas`가 이전 스켈레톤을 지속적으로 렌더링하는 문제 발생.
+
+**구현내용:**
+- **`MediaPipeDataSourceImpl.kt` 수정**: `processResult()` 내 손 미감지 분기에서 단순 `return` 대신, `_handLandmarks.tryEmit(emptyList())`를 먼저 호출하여 빈 리스트를 명시적으로 Flow에 방출하도록 변경.
+- 이를 통해 `TrackingViewModel` → `TrackingScreen`으로 빈 리스트가 전파되고, `handLandmarks.forEach`가 실행되지 않아 `Canvas`가 아무것도 그리지 않게 되어 스켈레톤이 즉시 소거됨.
+
+---
+
+## 2026-03-05
 **제목:** ViewModel 생명주기에 맞춘 MediaPipe 리소스 해제 (Memory Leak 방지)
 
 **요구사항:**
