@@ -21,4 +21,9 @@ interface HandRepository {
      * Bitmap 대신 픽셀 데이터인 ByteArray와 이미지 정보를 전달합니다.
      */
     fun processImage(data: ByteArray, width: Int, height: Int, rotationDegrees: Int)
+
+    /**
+     * 사용 중인 리소스를 모두 해제합니다.
+     */
+    fun close()
 }

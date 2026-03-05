@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import org.comon.wavemotion.data.HandRepositoryImpl
 import org.comon.wavemotion.data.VmcSender
+import org.comon.wavemotion.domain.usecase.CloseTrackingUseCase
 import org.comon.wavemotion.domain.usecase.ProcessImageUseCase
 import org.comon.wavemotion.domain.usecase.StreamHandTrackingUseCase
 import org.comon.wavemotion.mediapipe.MediaPipeDataSourceImpl
@@ -40,7 +41,8 @@ class MainActivity : ComponentActivity() {
 
         TrackingViewModelFactory(
             StreamHandTrackingUseCase(handRepository),
-            ProcessImageUseCase(handRepository)
+            ProcessImageUseCase(handRepository),
+            CloseTrackingUseCase(handRepository)
         )
     }
 

@@ -106,7 +106,7 @@ class MediaPipeDataSourceImpl(
 
     override fun getHandLandmarks(): Flow<List<HandLandmark>> = _handLandmarks.asSharedFlow()
 
-    fun close() {
+    override fun close() {
         handLandmarker?.close()
     }
 }

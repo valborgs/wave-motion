@@ -73,4 +73,8 @@ class HandRepositoryImpl(
 
         mediaPipeDataSource.processImage(rotatedBitmap, 0)
     }
+
+    override fun close() {
+        mediaPipeDataSource.close()
+    }
 }

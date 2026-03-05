@@ -7,12 +7,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.comon.wavemotion.domain.entity.HandLandmark
+import org.comon.wavemotion.domain.usecase.CloseTrackingUseCase
 import org.comon.wavemotion.domain.usecase.ProcessImageUseCase
 import org.comon.wavemotion.domain.usecase.StreamHandTrackingUseCase
 
 class TrackingViewModel(
     private val streamHandTrackingUseCase: StreamHandTrackingUseCase,
     private val processImageUseCase: ProcessImageUseCase,
+    private val closeTrackingUseCase: CloseTrackingUseCase
 ): ViewModel() {
 
     private val _handLandmarks = MutableStateFlow<List<HandLandmark>>(emptyList())
@@ -36,5 +38,10 @@ class TrackingViewModel(
         _imageSize.value = Pair(imageW, imageH)
 
         processImageUseCase(data, width, height, rotationDegrees)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        closeTrackingUseCase()
     }
 }

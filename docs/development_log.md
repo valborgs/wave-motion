@@ -5,6 +5,21 @@
 ---
 
 ## 2026-03-05
+**제목:** ViewModel 생명주기에 맞춘 MediaPipe 리소스 해제 (Memory Leak 방지)
+
+**요구사항:**
+- `TrackingViewModel`이 소멸(`onCleared()`)될 때, 백그라운드에서 동작 중인 `HandLandmarker`의 리소스가 정상적으로 해제되어야 함.
+- Clean Architecture 원칙(ViewModel -> UseCase -> Repository -> DataSource)을 준수하면서 계층을 거쳐 리소스 해제가 전파되도록 구성.
+
+**구현내용:**
+- **인터페이스 및 DataSource/Repository 확장**: `MediaPipeDataSource` 및 `HandRepository` 인터페이스에 `close()` 메서드를 각각 정의하고, `HandRepositoryImpl`에서 `mediaPipeDataSource.close()`를 위임하여 호출하도록 구현.
+- **UseCase 추가**: ViewModel이 Repository 구현을 직접 참조하지 않도록 `CloseTrackingUseCase`를 신규 생성하여 도메인 레이어에서 정리 작업을 처리하도록 캡슐화.
+- **ViewModel 리소스 해제**: `TrackingViewModel` 내부에 `onCleared()`를 오버라이드하고, DI를 통해 주입받은 `closeTrackingUseCase()`를 호출하여 자원 해제.
+- **의존성 주입 수정**: `TrackingViewModelFactory`와 `MainActivity`의 초기화 로직에 `CloseTrackingUseCase` 인스턴스를 생성하여 넘겨주도록 수정.
+
+---
+
+## 2026-03-05
 **제목:** 단일 손 트래킹에서 양손 트래킹으로 확장 연동
 
 **요구사항:**
