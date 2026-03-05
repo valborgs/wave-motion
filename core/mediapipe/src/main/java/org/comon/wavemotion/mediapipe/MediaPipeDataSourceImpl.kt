@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.os.SystemClock
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
+import com.google.mediapipe.tasks.vision.core.ImageProcessingOptions
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
@@ -58,10 +59,13 @@ class MediaPipeDataSourceImpl(
     /**
      * 카메라 모듈로부터 받은 비트맵 이미지를 MediaPipe에 전달합니다.
      */
-    override fun processImage(bitmap: Bitmap) {
+    override fun processImage(bitmap: Bitmap, rotationDegrees: Int) {
         val mpImage = BitmapImageBuilder(bitmap).build()
+        val imageProcessingOptions = ImageProcessingOptions.builder()
+            .setRotationDegrees(rotationDegrees) // 앞선 레이어에서 이미 회전되었으므로 0 전달
+            .build()
         // 실시간 스트림 모드에서는 타임스탬프 전달이 필수입니다.
-        handLandmarker?.detectAsync(mpImage, SystemClock.uptimeMillis())
+        handLandmarker?.detectAsync(mpImage, imageProcessingOptions, SystemClock.uptimeMillis())
     }
 
     /**

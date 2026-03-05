@@ -6,5 +6,5 @@ import org.comon.wavemotion.domain.entity.HandLandmark
 
 interface MediaPipeDataSource {
     fun getHandLandmarks(): Flow<HandLandmark>
-    fun processImage(bitmap: Bitmap)
+    fun processImage(bitmap: Bitmap, rotationDegrees: Int)
 }

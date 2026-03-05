@@ -62,10 +62,15 @@ class HandRepositoryImpl(
         }
     }
 
-    override fun processImage(data: ByteArray, width: Int, height: Int) {
+    override fun processImage(data: ByteArray, width: Int, height: Int, rotationDegrees: Int) {
         val bitmap = createBitmap(width, height)
         bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(data))
 
-        mediaPipeDataSource.processImage(bitmap)
+        // 사용자의 피드백에 맞춰 이미지를 물리적으로 회전시킵니다.
+        val matrix = android.graphics.Matrix()
+        matrix.postRotate(rotationDegrees.toFloat())
+        val rotatedBitmap = android.graphics.Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false)
+
+        mediaPipeDataSource.processImage(rotatedBitmap, 0)
     }
 }
